@@ -132,9 +132,9 @@ export let options = {
 
     1. **Сценарий Шторм**  
     
-    ![Шторм1](.\screenshots\storm1.png)
+    ![Шторм1](./screenshots/storm1.png)
 
-    ![Шторм2](.\screenshots\storm2.png)
+    ![Шторм2](./screenshots/storm2.png)
 
         * Метрики k6:
 
@@ -188,9 +188,9 @@ export let options = {
 
     2. **Сценарий Волна**  
     
-    ![Волна1](.\screenshots\volna1.png)
+    ![Волна1](./screenshots/volna1.png)
 
-    ![Волна2](.\screenshots\volna2.png)
+    ![Волна2](./screenshots/volna2.png)
 
         * Метрики k6
 
@@ -242,9 +242,9 @@ export let options = {
 
     3. **Сценарий Пики**  
     
-    ![Пики1](.\screenshots\piki1.png)
+    ![Пики1](./screenshots/piki1.png)
 
-    ![Пики2](.\screenshots\piki2.png)
+    ![Пики2](./screenshots/piki2.png)
 
         * Метрики k6
 
