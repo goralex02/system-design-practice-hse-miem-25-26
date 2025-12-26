@@ -3,10 +3,13 @@ import { check, sleep } from 'k6';
 
 export let options = {
   stages: [
-    { duration: '30s', target: 1000 },
-    { duration: '30s', target: 100 },
-    { duration: '1m', target: 200 },
-    { duration: '2m', target: 0 },
+    { duration: '30s', target: 200 },  // базовая нагрузка
+    { duration: '10s', target: 1000 }, // пик 1
+    { duration: '30s', target: 200 },
+    { duration: '10s', target: 1000 }, // пик 2
+    { duration: '30s', target: 200 },
+    { duration: '10s', target: 1000 }, // пик 3
+    { duration: '30s', target: 0 },    // завершение
   ],
 };
 
