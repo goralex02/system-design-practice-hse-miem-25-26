@@ -6,27 +6,27 @@
 
 ```docker run --rm -v "${PWD}:/src" alpine sh -c "apk add --no-cache dos2unix >/dev/null && find /src -type f \( -name '*.sh' -o -name '*.py' -o -name '*.yml' -o -name '*.yaml' -o -name '*.tmpl' -o -name '*.toml' \) -print -exec dos2unix {} \;"```
 
-![img](img/hw3-1.png)
+![img](img/hw3-1.PNG)
 
 Кластер demo состоит из 3 PostgreSQL-нод под управлением Patroni: patroni3 — лидер (мастер), patroni1 и patroni2 — реплики в состоянии streaming. Отставание реплик нулевое (Lag=0), Receive/Replay LSN совпадают, значит репликация работает корректно. Координация лидера и failover выполняется через etcd-кластер, а подключение клиентов маршрутизируется через HAProxy.
 
-![img](img/hw3-2.png)
+![img](img/hw3-2.PNG)
 
 HAProxy автоматически держит актуальную схему маршрутизации: запись идёт только на текущего лидера (patroni3), чтение — на реплики (patroni1, patroni2). При смене лидера HAProxy должен переключить UP в backend primary на нового лидера без ручной перенастройки.
 
-![img](img/hw3-3.png)
+![img](img/hw3-3.PNG)
 
 Из-за проброса портов в docker-compose (5002→5000, 5001→5001) write-endpoint оказался на порту 5002. Проверили через pg_is_in_recovery(): на 5002 значение false (лидер), на 5001 true (реплика). Поэтому скрипт выполняли на 5002, а на 5001 проверяли репликацию через SELECT
 
-![img](img/hw3-4.png)
+![img](img/hw3-4.PNG)
 
 Запускаем скрипт и видим как сыпятся данные.
 
-![img](img/hw3-5.png)
+![img](img/hw3-5.PNG)
 
 Видим новые записи в БД на 5002.
 
-![img](img/hw3-6.png)
+![img](img/hw3-6.PNG)
 
 Видим новые записи в БД на 5001.
 
@@ -34,9 +34,9 @@ HAProxy автоматически держит актуальную схему 
 
 Остановим одну реплику patroni1. Стрелялка продолжает работать, запись идёт в лидера, чтение может перейти на оставшуюся реплику. В patronictl list и HAProxy остается лидер + 1 реплика.
 
-![img](img/hw3-7.png)
+![img](img/hw3-7.PNG)
 
-![img](img/hw3-8.png)
+![img](img/hw3-8.PNG)
 
 После включения все снова как прежде.
 
@@ -46,43 +46,43 @@ HAProxy автоматически держит актуальную схему 
 
 В stdout стрелялки видим ошибку и остановку стрельбы.
 
-![img](img/hw3-9.png)
+![img](img/hw3-9.PNG)
 
 Видим, что в HAProxy все легли.
 
-![img](img/hw3-11.png)
+![img](img/hw3-11.PNG)
 
 Но затем назначили нового лидера.
 
-![img](img/hw3-12.png)
+![img](img/hw3-12.PNG)
 
 И вот уже живые две patroni.
 
-![img](img/hw3-10.png)
+![img](img/hw3-10.PNG)
 
 В моем случае, ни подождав несколько минут, ни перезапустив patroni3, стрелялка так и не ожила, хотя по идее должна была, раз назначили нового лидера.
 
-![img](img/hw3-13.png)
+![img](img/hw3-13.PNG)
 
 ## Эксперимент C: выключаем etcd (проверяем кворум)
 
 Остановим одну etcd ноду ```docker stop demo-etcd1```. Всё продолжает работать, 2/3 кворум есть.
 
-![img](img/hw3-13.png)
+![img](img/hw3-13.PNG)
 
-![img](img/hw3-14.png)
+![img](img/hw3-14.PNG)
 
 Остановим еще одну etcd ноду, кворума нет. Лидер продолжает обслуживать запросы несколько секунд, но управление кластером (failover, смена лидера, обновление статуса) ломается, выскакивают ошибки, что сервер недоступен
 
-![img](img/hw3-15.png)
+![img](img/hw3-15.PNG)
 
-![img](img/hw3-16.png)
+![img](img/hw3-16.PNG)
 
-![img](img/hw3-17.png)
+![img](img/hw3-17.PNG)
 
-![img](img/hw3-18.png)
+![img](img/hw3-18.PNG)
 
-![img](img/hw3-19.png)
+![img](img/hw3-19.PNG)
 
 ## Эксперимент D: выключаем HAProxy (SPOF)
 
@@ -90,8 +90,8 @@ HAProxy автоматически держит актуальную схему 
 
 Стрелялка, которая ходит через localhost:5001/5002, падает по соединению (connection refused), при этом ноды живы. При этом HAProxy также упал. Причина в том, что пропала точка входа.
 
-![img](img/hw3-20.png)
+![img](img/hw3-20.PNG)
 
-![img](img/hw3-21.png)
+![img](img/hw3-21.PNG)
 
-![img](img/hw3-22.png)
+![img](img/hw3-22.PNG)
